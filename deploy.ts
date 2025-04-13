@@ -15,8 +15,9 @@ type DataMap = {
 
 interface Message {
   id: string;
-  content: string;
-  timestamp: number;
+  text: string;
+  time: number;
+  user: string;
 }
 
 interface Rating {
@@ -25,8 +26,11 @@ interface Rating {
 }
 
 interface Reply {
+  text: string;
+  user: string;
+  time: number;
   id: string;
-  parentId: string;
+  to: string;
   content: string;
 }
 
@@ -62,12 +66,12 @@ const handleRatingUpdate = (data: Rating, previousData: Rating[]) => {
 const updateKVData = async <T extends DataType>(type: T, data: DataMap[T]) => {
   try {
     const previousData = await getData<Rating>(type);
-    const newData = type === "rating" 
+    const newData = type === "rating"
       ? handleRatingUpdate(data as Rating, previousData as Rating[])
       : [...previousData, data];
-    
+
     await saveData(type, newData);
-    return newData;
+    return { type, data: newData };
   } catch (error) {
     console.error(`[WebSocket] Error updating ${type}:`, error);
     throw error;
@@ -78,7 +82,7 @@ const updateKVData = async <T extends DataType>(type: T, data: DataMap[T]) => {
 const handler = (req: Request) => {
   const url = new URL(req.url);
   const pathParts = url.pathname.split('/').filter(Boolean);
-  
+
   // WebSocket 连接处理
   if (req.headers.get("upgrade") === "websocket") {
     const { socket, response } = Deno.upgradeWebSocket(req);
@@ -93,16 +97,16 @@ const handler = (req: Request) => {
         try {
           const rawData = JSON.parse(event.data);
           const type = rawData.type as DataType;
-          
+
           if (!type || !KV_KEYS[type]) {
             throw new Error("Invalid data type");
           }
 
           const { type: _, ...payload } = rawData;
-          const newData = await updateKVData(type, payload);
-          
-          // 广播给所有连接
-          const broadcastData = JSON.stringify(newData);
+          const result = await updateKVData(type, payload); // 已经返回带type的数据
+
+          // 广播时直接发送完整结构
+          const broadcastData = JSON.stringify(result); // <-- 不再需要手动添加type
           wsConnections.forEach((ws) => {
             if (ws.readyState === WebSocket.OPEN) {
               ws.send(broadcastData);
@@ -125,7 +129,7 @@ const handler = (req: Request) => {
 
     return response;
   }
-  
+
   // 静态文件服务
   if (pathParts.length === 0 || pathParts[0] !== 'api') {
     return serveDir(req, {
@@ -144,7 +148,7 @@ const handler = (req: Request) => {
   return (async () => {
     try {
       const data = await getData(type);
-      return new Response(JSON.stringify(data), {
+      return new Response(JSON.stringify({ type, data }), {
         headers: { "Content-Type": "application/json" },
       });
     } catch (error) {

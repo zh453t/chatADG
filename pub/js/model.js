@@ -10,10 +10,13 @@ export const socket = new WebSocket(`${config.protocols.websocket}://${location.
 // -- http --
 /**
  * get everyting
- * @param {string} type 
+ * @param {string} type
  * @returns {Promise<Message[] | {id, ratings}[] | Reply[]>} promise from fetch()
  */
-export const get = (type) => fetch(`./api/${type}`).then((res) => res.json());
+export const get = (type) =>
+	fetch(`./api/${type}`)
+		.then((res) => res.json())
+		.then((data) => data.data);
 
 /**
  * send everyting
@@ -26,5 +29,5 @@ export const send = (data) => {
 	}
 
 	// 使用 socket 发送
-	socket.send(JSON.stringify(data))
+	socket.send(JSON.stringify(data));
 };
