@@ -130,7 +130,7 @@ const handler = (req: Request) => {
   if (pathParts.length === 0 || pathParts[0] !== 'api') {
     return serveDir(req, {
       fsRoot: config.dirs.static,
-      urlRoot: "/",
+      urlRoot: "",
     });
   }
 

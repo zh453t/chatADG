@@ -13,7 +13,7 @@ export const socket = new WebSocket(`${config.protocols.websocket}://${location.
  * @param {string} type 
  * @returns {Promise<Message[] | {id, ratings}[] | Reply[]>} promise from fetch()
  */
-export const get = (type) => fetch(`./${type}`).then((res) => res.json());
+export const get = (type) => fetch(`./api/${type}`).then((res) => res.json());
 
 /**
  * send everyting
