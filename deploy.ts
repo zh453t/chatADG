@@ -39,7 +39,7 @@ const KV_KEYS: Record<DataType, Deno.KvKey> = {
 // -- 数据访问层 --
 const getData = async <T>(type: DataType): Promise<T[]> => {
   const result = await kv.get<T[]>(KV_KEYS[type]);
-  return result.value || [];
+  return result.value || []; // 空值时返回 []
 };
 
 const saveData = async <T>(type: DataType, data: T[]): Promise<void> => {
@@ -130,7 +130,7 @@ const handler = (req: Request) => {
   if (pathParts.length === 0 || pathParts[0] !== 'api') {
     return serveDir(req, {
       fsRoot: config.dirs.static,
-      urlRoot: "",
+      urlRoot: "/",
     });
   }
 
