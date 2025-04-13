@@ -1,0 +1,259 @@
+/* 主题色 */
+:root {
+	--text-color: #444;
+	--background-color: #fff;
+	--svg-fill: #625c5c67;
+	--border-color: #888;
+	--button-bg-hover: var(--text-color);
+}
+
+/* 全局样式 */
+@layer global {
+	html {
+		font-size: clamp(1.1rem, 2vw, 1.3rem);
+	}
+
+	body {
+		font-family: 'Calibri', '等线', 'Pingfang SC', system-ui, 'Open Sans';
+		min-height: 75vh;
+		padding: 0 10vw;
+		line-height: 1.9;
+		background-color: var(--background-color);
+		color: var(--text-color);
+		transition: background-color 0.3s, color 0.3s; /* 过渡效果 */
+	}
+
+	ul {
+		list-style: none;
+	}
+
+	button {
+		font: inherit;
+		cursor: pointer;
+		border: 1px solid #555;
+		padding: 0.5em;
+		border-radius: 5px; /* 圆角 */
+		transition: background-color 0.2s, transform 0.2s; /* 过渡效果 */
+	}
+
+	button:hover {
+		background-color: var(--button-bg-hover);
+		color: var(--background-color);
+		transform: scale(1.05); /* 放大效果 */
+	}
+
+	input,
+	textarea {
+		font-family: inherit;
+		padding: 1em;
+		border: 1px solid #000;
+		margin: 1em 0.5em;
+		font-size: 0.9em;
+		border-radius: 5px; /* 圆角 */
+		box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* 阴影 */
+		transition: background-color 0.2s, color 0.2s;
+	}
+
+	input:focus,
+	textarea:focus {
+		background-color: #555;
+		color: #fff;
+		outline: none; /* 去掉默认轮廓 */
+		box-shadow: 0 0 5px rgba(255, 255, 255, 0.5); /* 聚焦时的阴影 */
+	}
+
+	svg.icon {
+		width: 0.9em;
+		margin-right: 0.2em;
+		fill: var(--svg-fill);
+	}
+}
+
+/* 主题色（深色模式） */
+@media (prefers-color-scheme: dark) {
+	:root {
+		--text-color: #eee;
+		--background-color: #2e3238;
+		--svg-fill: rgba(156, 167, 189, 0.404);
+	}
+}
+
+/* 标题样式 */
+@layer title {
+	h2 {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		flex-wrap: wrap;
+		gap: 0.5em;
+	}
+
+	h2 span {
+		font-family: Rockwell;
+	}
+}
+
+/* 输入表单样式 */
+@layer input-form {
+	section.form {
+		display: grid;
+		grid-template-areas:
+			'form'
+			'file clearBtn'
+			'file link';
+		gap: 1em 0;
+	}
+
+	form {
+		display: grid;
+		grid-template-areas:
+			'input  input'
+			'username submit';
+		grid-template-columns: 3fr 1fr;
+		justify-content: center;
+		align-items: center;
+	}
+
+	form > textarea {
+		min-width: 70%;
+		min-height: 2em;
+		margin: 0;
+		grid-area: input;
+	}
+
+	.username-label {
+		grid-area: username;
+	}
+
+	button[type='submit'] {
+		grid-area: submit;
+	}
+}
+
+/* 消息样式 */
+@layer message {
+	ul.msg {
+		padding: 0;
+	}
+
+	ul.msg > li {
+		display: grid;
+		align-items: center;
+		justify-content: space-between;
+		grid-template-columns: repeat(2, auto);
+		padding: 1em 0;
+		border-bottom: var(--border-color) dashed 1px;
+	}
+
+	div.msg-info {
+		display: flex;
+		gap: 1em;
+	}
+
+	.info-cell {
+		display: flex;
+		align-items: center;
+	}
+
+	@layer 评分 {
+		.ratingBlock {
+			text-align: center;
+			cursor: pointer;
+		}
+
+		.ratingBlock .rating {
+			font-weight: bold;
+			color: #444;
+			line-height: 1.5;
+			color: var(--text-color);
+		}
+
+		.ratingBlock .ratingBar {
+			background-color: #72767d;
+			height: 4px;
+			min-width: 30px;
+			position: relative;
+			width: 100%;
+		}
+
+		.ratingBlock .ratingBar div {
+			height: 100%;
+			background-color: #85ce73;
+			position: absolute;
+			left: 0;
+			bottom: 0;
+		}
+
+		.ratingBlock .ratingBar div.green {
+			background-color: #85ce73;
+		}
+
+		.ratingBlock .ratingBar div.yellow {
+			background-color: khaki;
+		}
+
+		.ratingBlock .ratingBar div.red {
+			background-color: #d76666;
+		}
+	}
+
+	@layer info {
+		/* 4 */
+		ul.msg > .chat-content .msg-info {
+			white-space: nowrap;
+			padding-left: 1em;
+			display: flex;
+			gap: 1em;
+		}
+		ul.msg > .chat-content .info-cell {
+			font-size: smaller;
+			display: flex;
+			align-items: center;
+			color: var(--text-color);
+		}
+		.chat-content .msg-info .msg-info-cell span.msg-user {
+			white-space: break-spaces;
+		}
+	}
+	@layer reply {
+		ul.msg > li.chat-content ul.reply {
+			margin-top: 1em;
+			margin-right: 0.5em;
+			border-left: var(--text-color) 0.5em solid;
+		}
+		ul.msg > li.chat-content .reply-info {
+			display: flex;
+			gap: 1em;
+		}
+		ul.msg > li.chat-content ul.reply li.reply-msg {
+			margin-block: 0.5em;
+		}
+	}
+}
+
+/* 响应式设计 */
+@media screen and (max-width: 1000px) {
+	html {
+		font-size: 4.5vw;
+	}
+
+	body {
+		min-height: unset;
+		height: 100vh;
+	}
+
+	form textarea {
+		width: 90%;
+	}
+
+	.username-label input {
+		width: 27vw;
+	}
+}
+
+/* 其他样式 */
+@layer other {
+	.section {
+		margin-bottom: 10px;
+	}
+}
