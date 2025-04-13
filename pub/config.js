@@ -1,8 +1,8 @@
 export default {
   // Deno Deploy 会自动分配端口，通常不需要指定
   port: {
-    http: parseInt(Deno.env.get("PORT")) || 443,    // 使用环境变量或默认443
-    websocket: parseInt(Deno.env.get("PORT")) || 443 // WebSocket 与 HTTP 同端口
+    http: 443,    // 使用环境变量或默认443
+    websocket: 443 // WebSocket 与 HTTP 同端口
   },
 
   // Deno Deploy 需要监听 0.0.0.0

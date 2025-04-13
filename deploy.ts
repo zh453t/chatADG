@@ -155,7 +155,7 @@ const handler = (req: Request) => {
 };
 
 // 启动单一服务器
-const port = config.port.http;
+const port = parseInt(Deno.env.get("PORT") ?? "0") || config.port.http; // 前端待解决
 const hostname = config.hostname;
 
 Deno.serve({ port, hostname }, handler);

@@ -1,4 +1,3 @@
-import { Message, Reply, Rating } from './structs.js';
 import config from '../config.js';
 
 export const state = {
@@ -6,7 +5,7 @@ export const state = {
 };
 
 // -- websocket --
-export const socket = new WebSocket(`${config.protocols.websocket}://${window.location.hostname}:${config.port.websocket}`);
+export const socket = new WebSocket(`${config.protocols.websocket}://${location.hostname}:${config.port.websocket}`);
 
 // -- http --
 /**
