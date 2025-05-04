@@ -5,22 +5,39 @@ export const state = {
 };
 
 // -- websocket --
-export const socket = new WebSocket(`${config.protocols.websocket}://${location.hostname}:${config.port.websocket}`);
+export const socket = new WebSocket(`${location.hostname}:${config.port.websocket}`);
 
 // -- http --
 /**
- * get everyting
+ * GET
  * @param {string} type
- * @returns {Promise<Message[] | {id, ratings}[] | Reply[]>} promise from fetch()
+ * @returns {Promise<Message[] | {id, ratings}[] | Reply[]>} 
  */
-export const get = (type) =>
-	fetch(`./api/${type}`)
-		.then((res) => res.json())
-		.then((data) => data.data);
+export const get = async (type) => {
+	try {
+		const res = await fetch(`./api/${type}`);
+
+		if (!res.ok) {
+			throw new Error(`请求失败：${res.status} ${res.statusText}`);
+		}
+
+		const result = await res.json();
+
+		if (!result.data) {
+			throw new Error(`格式错误。预期为 { data: [] }`);
+		}
+
+		return result.data;
+	} catch (error) {
+		console.error(`获取 ${type} 出错：`, error);
+		return []; // 或根据需要返回 null、抛出异常等
+	}
+};
+
 
 /**
- * send everyting
- * @param {Message | Reply | Rating} data
+ * POST
+ * @param {{type: string, data: Message | Reply | Rating}} data
  */
 export const send = (data) => {
 	// 错误处理

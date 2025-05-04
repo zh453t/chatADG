@@ -1,21 +1,9 @@
 'use strict';
 import { Message, Rating } from './structs.js';
-import { state } from './model.js';
-const icons = {
-	clock: `<svg class="icon" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-<path clip-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-13a.75.75 0 00-1.5 0v5c0 .414.336.75.75.75h4a.75.75 0 000-1.5h-3.25V5z" fill-rule="evenodd"></path>
-</svg>`,
-	user: `<svg class="icon" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-<path clip-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-5.5-2.5a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0zM10 12a5.99 5.99 0 00-4.793 2.39A6.483 6.483 0 0010 16.5a6.483 6.483 0 004.793-2.11A5.99 5.99 0 0010 12z" fill-rule="evenodd"></path>
-</svg>`,
-};
 
 // 消息
 class ChatView {
 	msgContainer = document.querySelector('ul.msg');
-
-	// svg 图表
-	icons = icons;
 
 	/**
 	 * 生成消息元素
@@ -39,11 +27,11 @@ class ChatView {
 
 		const infoCellTime = document.createElement('div');
 		infoCellTime.classList.add('info-cell');
-		infoCellTime.innerHTML = `${this.icons.clock}${date}`;
+		infoCellTime.innerHTML = date;
 
 		const infoCellUser = document.createElement('div');
 		infoCellUser.classList.add('info-cell');
-		infoCellUser.innerHTML = `${this.icons.user}<span class="msg-user">${message.user}</span>`;
+		infoCellUser.innerHTML = `<span class="msg-user">${message.user}</span>`;
 
 		smallerText.appendChild(infoCellTime);
 		smallerText.appendChild(infoCellUser);
@@ -100,15 +88,15 @@ class ChatView {
 	 */
 	render(messages) {
 		// 创建文档片段。将每条消息分别添加到文档片段中，然后倒序添加到 DOM 中，保证时间靠后的消息靠前显示
-		let fragments = [];
+		const fragments = [];
 		messages.forEach((message) => {
 			const fragment = document.createDocumentFragment();
 			fragment.appendChild(this.#generateElement(message));
-			fragments.push(fragment)
+			fragments.push(fragment);
 		});
 		fragments.forEach((fragment) => {
 			this.msgContainer.prepend(fragment);
-		})
+		});
 	}
 
 	/**
@@ -148,7 +136,7 @@ class ReplyView extends ChatView {
 		const infoCell = document.createElement('div');
 		infoCell.classList.add('info-cell');
 		const time = new Date(reply.time).toLocaleString();
-		infoCell.innerHTML = `${this.icons.clock}${time}`;
+		infoCell.innerHTML = time;
 
 		replyInfo.appendChild(infoCell);
 
@@ -160,14 +148,18 @@ class ReplyView extends ChatView {
 
 	/**
 	 * 渲染回复
-	 * @param {Reply} reply
+	 * 格式 `{<id>: [{text, user, time, to}, ...], ...}`
 	 */
-	render(reply) {
-		// 获取回复的容器
-		const container = this.msgContainer.querySelector(`.chat-content[data-id="${reply.to}"] ul.reply`);
-		if (!container) return console.warn('reply for an unknown message.', reply);
-		// 添加回复
-		container.appendChild(this.#generateElement(reply));
+	render(replyCollection) {
+		for (const [id, replies] of Object.entries(replyCollection)) {
+			// 获取回复的容器
+			const container = this.msgContainer.querySelector(`.chat-content[data-id="${id}"] ul.reply`);
+			if (!container) return console.warn('reply for an unknown message.');
+			// 添加回复，按时间倒序
+			replies.forEach((reply) => {
+				container.prepend(this.#generateElement(reply));
+			});
+		}
 	}
 
 	/**
@@ -218,38 +210,14 @@ class RatingsView {
 
 	/**
 	 * 渲染评分
-	 * render ratings
-	 * @param {{id: string, ratings: number[]}} _
+	 * 格式：`{'weh3r124': [10,100,...], ...s}`
 	 */
-	render({ id, ratings }) {
-		const { container, bar } = this.#getRatingElements(id);
-		if (!container || !bar) return;
-
-		this.#updateRatingUI(container, bar, ratings);
-	}
-
-	/**
-	 * 更新评分 (state.rating 中格式为 {id, ratings})
-	 * @param {{ id: string, value: number }} param0
-	 */
-	update({ id, value }) {
-		const { container, bar } = this.#getRatingElements(id);
-		if (!container || !bar) return;
-
-		// 在 state.ratings 中查找 id
-		let ratingEntry = state.ratings.find((r) => r.id === id);
-
-		if (!ratingEntry) {
-			// 如果没有该 id，则创建一个新的评分记录
-			ratingEntry = { id, ratings: [] };
-			state.ratings.push(ratingEntry);
+	render(ratings) {
+		for (const [id, rating] of Object.entries(ratings)) {
+			const { container, bar } = this.#getRatingElements(id);
+			if (!container || !bar) return;
+			this.#updateRatingUI(container, bar, rating);
 		}
-
-		// 添加评分
-		ratingEntry.ratings.push(value);
-
-		// 更新 UI
-		this.#updateRatingUI(container, bar, ratingEntry.ratings);
 	}
 
 	/**
@@ -279,10 +247,10 @@ class RatingsView {
 	 * 更新评分 UI
 	 * @param {HTMLElement} container - 评分容器
 	 * @param {HTMLElement} bar - 评分条
-	 * @param {number[]} ratings - 评分数组
+	 * @param {number[]} rating - 评分数组
 	 */
-	#updateRatingUI(container, bar, ratings) {
-		const avg = Rating.calcAvg(ratings);
+	#updateRatingUI(container, bar, rating) {
+		const avg = Rating.calcAvg(rating);
 		container.querySelector('.rating').innerHTML = `${avg}`;
 		this.#renderBar(bar, avg);
 	}
@@ -339,25 +307,25 @@ class InputView {
 
 // 时间
 class Time {
-  #timeElement = document.querySelector("#time");
-  /**
-   * render time
-   * @param {string} time locale time string
-   */
-  #render(time) {
-    this.#timeElement.textContent = time;
-  }
-  constructor() {
-    this.#render(new Date().toLocaleTimeString());
-    // 1. 获取现在的毫秒数
-    const mStart = new Date().getMilliseconds();
-    // 2. 校准时间
-    setTimeout(() => {
-      setInterval(() => {
-        this.#render(new Date().toLocaleTimeString());
-      }, 1000);
-    }, 1000 - mStart); //😎
-  }
+	#timeElement = document.querySelector('#time');
+	/**
+	 * render time
+	 * @param {string} time locale time string
+	 */
+	#render(time) {
+		this.#timeElement.textContent = time;
+	}
+	constructor() {
+		this.#render(new Date().toLocaleTimeString());
+		// 1. 获取现在的毫秒数
+		const mStart = new Date().getMilliseconds();
+		// 2. 校准时间
+		setTimeout(() => {
+			setInterval(() => {
+				this.#render(new Date().toLocaleTimeString());
+			}, 1000);
+		}, 1000 - mStart); //😎
+	}
 }
 
 export const inputView = new InputView();

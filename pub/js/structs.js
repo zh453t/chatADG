@@ -1,5 +1,4 @@
 export class Message {
-	/** @type {string} */ type = 'message';
 	/** @type {string} */ text;
 	/** @type {string} */ user;
 	/** @type {number} */ time = Date.now();
@@ -36,7 +35,6 @@ export class Message {
  * see {@link Message}
  */
 export class Reply extends Message {
-	/** @type {string} */ type = 'reply';
 	/** @type {string} */ to;
 
 	/** @param {{text: string, user: string, to: string}} _ */
@@ -47,7 +45,6 @@ export class Reply extends Message {
 }
 
 export class Rating {
-	/** @type {string} */ type = 'rating';
 	/** @type {string} */ id;
 	/** @type {number} */ value;
 	constructor({ id, value }) {
@@ -73,6 +70,3 @@ export class Rating {
 		return Math.round(sum / arr.length);
 	}
 }
-
-// 数据库中的 rating 数据结构
-// {id: string, ratings: number[]}
