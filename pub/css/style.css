@@ -87,6 +87,10 @@
 		font-size: 0.8em;
 		opacity: 0.8;
 	}
+
+	p {
+		margin-block: 0.6em;
+	}
 }
 
 /* 主题色（深色模式） */
@@ -104,9 +108,6 @@
 
 /* 标题样式 */
 @layer title {
-	header {
-		padding: 1.5em 0;
-	}
 
 	h2 {
 		display: flex;
@@ -114,26 +115,24 @@
 		justify-content: space-between;
 		flex-wrap: wrap;
 		gap: 0.5em;
-		margin: 0;
+		margin-block: 1em;
 	}
 
 	h2 span {
 		font-family: Rockwell, serif;
-		font-size: 1.5em;
+		font-size: 1.2em;
 		color: var(--primary-color);
 	}
 }
 
 /* 输入表单样式 */
 @layer input-form {
-	section.form {
-		margin-bottom: 1.5em;
-	}
 
 	form {
 		display: flex;
 		flex-direction: column;
 		gap: 0.5em;
+		margin-bottom: 1.5em;
 	}
 
 	.username-label {
@@ -176,16 +175,17 @@
 	}
 
 	ul.msg > li.chat-content {
-		padding: 0.6em 1.5em;
+		padding: 0.5em 2.2em 1em 2.2em;
 		border-radius: 0.5em;
 		background-color: var(--input-bg);
 		box-shadow: var(--card-shadow);
+		border: 1px solid var(--border-color);
 		display: grid;
 		grid-template-columns: 1fr auto;
 		grid-template-areas:
 			'main rating'
 			'reply reply';
-		gap: 1em;
+		column-gap: 1em;
 		align-items: center;
 	}
 
@@ -258,10 +258,13 @@
 
 	@layer reply {
 		ul.reply {
-			margin-top: 1em;
+			margin-top: 0.5em;
 			padding-left: 1em;
 			border-left: 0.25em solid var(--border-color);
 			grid-area: reply;
+		}
+		ul.reply:not(:has(li)) {
+			margin-top: 0;
 		}
 
 		ul.reply li {
@@ -308,5 +311,17 @@
 @media screen and (min-width: 1024px) {
 	body {
 		padding: 0 15vw;
+		font-size: 0.88em;
+
+		h2 {
+			margin-bottom: 0.7em;
+		}
+		textarea {
+			min-height: 1.3em;
+		}
+		li.chat-content {
+			gap: 0;
+		}
+
 	}
 }

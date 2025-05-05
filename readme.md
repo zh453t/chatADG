@@ -1,34 +1,44 @@
 ## 使用
-1. `git clone`
-2. 在 `deploy.js` 的目录中创建名为 'data.db' 的空白文件
-3. deno run --unstable-kv --allow-read --allow-write --allow-net --allow-env deploy.js
+0. *安装 `git` `deno`*
+1. `git clone https://github.com/zh453t/chatADG`
+2. 在任意目录中创建一个后缀名为 `.db` 的空白文件
+3. 修改 `deploy.js` 第 4 行为：`Deno.openKv('<db_file_path>')`
+3. 执行 `deno run --unstable-kv --allow-read --allow-write --allow-net --allow-env deploy.js`
 
-## 数据格式
-### KV
+## 数据格式与要求
+| Type | Format |
+| --- | --- |
+| `Message` | `{ text: string, user: string, time: number, id: string }` |
+| `Rating` | `{ id: string, value: number }` |
+| `Reply` | `{ text: string, user: string, time: number, to: string, id: string }` |
 
-| Value                 | Format                      |
-| --------------------- | --------------------------- |
-| `["message", "<id>"]` | `{id, text, user, time}`    |
-| `["rating", "id"]`    | `num[]`              |
-| `["reply", "id"]`     | `[{text, user, time}, ...]` |
+### Deno.KV
+
+| Key | Format |
+| --- | --- |
+| `["message", "<id>"]` | `Message` |
+| `["rating", "id"]` | `number[]` |
+| `["reply", "id"]` | `Reply[]` |
 
 ### GET
 | Endpoint | Format |
 | --- | --- |
-| `/api/messages` | `{type: "messages", data:[{id, text, user, time}, ...]}` |
-| `/api/ratings` | `{type: "ratings", data:{<id>: [rating1, ratings2, ...], ...}` |
-| `/api/replies` | `{type: "replies", data: {<id>: [{text, user, time, to, id}, ...], ...}` |
-| `/api/ratings/:id` | `{ "type": "ratings", "id": "123", "data": [5, 4, 5] }` |
-| `/api/replies/:id` | `{ "type": "replies", "id": "123", "data": [{ "id": "...", "text": "...", ... }]` |
+| `/api/messages` | `{ type: "messages", data: Message[] }` |
+| `/api/ratings` | `{ type: "ratings", data: { <id>: number[], ... } }` |
+| `/api/replies` | `{ type: "replies", data: { <id>: Reply[], ... }` |
+| `/api/ratings/:id` | `{ type: "ratings", id: string, data: number[] }` |
+| `/api/replies/:id` | `{ type: "replies", id: string, data: Reply[] }` |
 
 ### POST
 | Endpoint | Format |
 | --- | --- |
-| /api/messages | `{type: "message", data: {{id, text, user, time}}` |
-| /api/ratings | `{type: "rating", data: {id, value}}` |
-| /api/replies | `{type: "reply", data: {to, text, user, time}` |
+| `/api/messages` | `{ type: "message", data: Message }` |
+| `/api/ratings` | `{ type: "rating", data: Rating }` |
+| `/api/replies` | `{ type: "reply", data: Reply }` |
 
 ### Websocket Broadcast
- - `{type: "message", data: {id, text, user, time}}`
- - `{type: "rating", data: {id, ratings}}`
- - `{type: "reply", data: {id, replies: [{text, user, time, to, id}, ...]}}`
+| Type | Format |
+| --- | --- |
+| `Message` | `{ type: "message", data: Message }` |
+| `Rating` | `{ type: "rating", data: { id: string, ratings: number[] } }` |
+| `Reply` | `{ type: "reply", data: { id: string, replies: Reply[] } }` |
